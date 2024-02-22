@@ -1,10 +1,12 @@
-type MySaasErrorOptions = { response?: Response };
+type SendgridErrorOptions = { response?: Response; request?: Request };
 
-export class MySaasError extends Error {
+export class SendgridError extends Error {
   response?: Response;
+  request?: Request;
 
-  constructor(message: string, { response }: MySaasErrorOptions = {}) {
+  constructor(message: string, { response, request }: SendgridErrorOptions = {}) {
     super(message);
     this.response = response;
+    this.request = request;
   }
 }
