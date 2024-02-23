@@ -6,22 +6,24 @@
  * These file illustrate potential scenarios and methodologies relevant for SaaS integration.
  */
 
-import { MySaasError } from './commons/error';
+import { SendgridError  } from './commons/error';
 
-export type MySaasUser = {
-  id: string;
+export type SendGridUser = {
   username: string;
   email: string;
 };
 
-type GetUsersResponseData = { users: MySaasUser[]; nextPage: number | null };
+type GetUsersResponseData = { users: SendGridUser[]; nextPage: number | null };
 
-export const getUsers = async (token: string, page: number | null) => {
-  const response = await fetch(`https://mysaas.com/api/v1/users?page=${page}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+export const getSendGridUsers = async (token: string, limit: number, offset: number) => {
+  const response = await fetch(
+    `https://api.sendgrid.com/v3/teammates?limit=${limit}&offset=${offset}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
   if (!response.ok) {
-    throw new MySaasError('Could not retrieve users', { response });
+    throw new SendgridError('Could not retrieve users', { response });
   }
   return response.json() as Promise<GetUsersResponseData>;
 };
