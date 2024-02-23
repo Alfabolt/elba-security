@@ -7,7 +7,7 @@ import { env } from '@/env';
 import * as auth from '@/connectors/auth';
 import { registerOrganisation } from './service';
 
-const token = env.SEGMENT_API_TOKEN;
+const token = env.SENDGRID_API_TOKEN;
 const region = 'us';
 const now = new Date();
 
@@ -50,13 +50,13 @@ describe('registerOrganisation', () => {
 
     expect(send).toBeCalledTimes(1);
     expect(send).toBeCalledWith({
-      name: 'segment/users.page_sync.requested',
+      name: 'sendgrid/users.page_sync.requested',
       data: {
         isFirstSync: true,
         organisationId: organisation.id,
         syncStartedAt: now.getTime(),
         region,
-        page: '0',
+        offset: 0,
       },
     });
 
@@ -92,13 +92,13 @@ describe('registerOrganisation', () => {
     // verify that the user/sync event is sent
     expect(send).toBeCalledTimes(1);
     expect(send).toBeCalledWith({
-      name: 'segment/users.page_sync.requested',
+      name: 'sendgrid/users.page_sync.requested',
       data: {
         isFirstSync: true,
         organisationId: organisation.id,
         syncStartedAt: now.getTime(),
         region,
-        page: '0',
+        offset: 0,
       },
     });
   });

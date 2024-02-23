@@ -4,15 +4,20 @@ import { logger } from '@elba-security/logger';
 import { rateLimitMiddleware } from './middlewares/rate-limit-middleware';
 
 export const inngest = new Inngest({
-  id: '{SaaS}',
+  id: 'sendgrid',
   schemas: new EventSchemas().fromRecord<{
-    '{SaaS}/users.page_sync.requested': {
+    'sendgrid/users.page_sync.requested': {
       data: {
         organisationId: string;
         region: string;
         isFirstSync: boolean;
         syncStartedAt: number;
-        page: number | null;
+        page: string | null;
+      };
+    };
+    'sendgrid/sendgrid.elba_app.uninstalled': {
+      data: {
+        organisationId: string;
       };
     };
   }>(),

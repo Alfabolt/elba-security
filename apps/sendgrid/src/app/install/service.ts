@@ -1,4 +1,4 @@
-// import { validateToken } from '@/connectors/auth';
+import { validateToken } from '@/connectors/auth';
 import { db } from '@/database/client';
 import { Organisation } from '@/database/schema';
 import { inngest } from '@/inngest/client';
@@ -14,7 +14,7 @@ export const registerOrganisation = async ({
   token,
   region,
 }: SetupOrganisationParams) => {
-  // await validateToken(token);
+  await validateToken(token);
   const [organisation] = await db
     .insert(Organisation)
     .values({ id: organisationId, region, token })
@@ -32,13 +32,13 @@ export const registerOrganisation = async ({
   }
 
   await inngest.send({
-    name: 'segment/users.page_sync.requested',
+    name: 'sendgrid/users.page_sync.requested',
     data: {
       isFirstSync: true,
       organisationId,
       region,
       syncStartedAt: Date.now(),
-      page: '0',
+      offset: 0,
     },
   });
   return organisation;
