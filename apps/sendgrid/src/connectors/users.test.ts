@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call -- test conveniency */
-/* eslint-disable @typescript-eslint/no-unsafe-return -- test conveniency */
 /**
  * DISCLAIMER:
  * The tests provided in this file are specifically designed for the `auth` connectors function.
@@ -10,56 +8,59 @@
 
 import { http } from 'msw';
 import { describe, expect, test, beforeEach } from 'vitest';
+import { env } from '@/env';
 import { server } from '../../vitest/setup-msw-handlers';
-import { type MySaasUser, getUsers } from './users';
-import { MySaasError } from './commons/error';
+import { type SendGridUser, getSendGridUsers } from './users';
+import type { SendgridError } from './commons/error';
 
-const validToken = 'token-1234';
-const maxPage = 3;
+const sendGridUsers: SendGridUser[] = [
+  {
+  username: "awan7676",
+  email: "abdullah.awan@alfabolt.com",
+  }
+];
 
-const users: MySaasUser[] = Array.from({ length: 5 }, (_, i) => ({
-  id: `id-${i}`,
-  username: `username-${i}`,
-  email: `user-${i}@foo.bar`,
-}));
+const validToken = env.SENDGRID_API_TOKEN; 
 
-describe('auth connector', () => {
-  describe('getUsers', () => {
-    // mock token API endpoint using msw
-    beforeEach(() => {
-      server.use(
-        http.get('https://mysaas.com/api/v1/users', ({ request }) => {
-          // briefly implement API endpoint behaviour
-          if (request.headers.get('Authorization') !== `Bearer ${validToken}`) {
-            return new Response(undefined, { status: 401 });
-          }
-          const url = new URL(request.url);
-          const pageParam = url.searchParams.get('page');
-          const page = pageParam ? Number(pageParam) : 0;
-          if (page === maxPage) {
-            return Response.json({ nextPage: null, users });
-          }
-          return Response.json({ nextPage: page + 1, users });
-        })
-      );
-    });
+const limit = 10;
+let offset = 0; 
 
-    test('should return users and nextPage when the token is valid and their is another page', async () => {
-      await expect(getUsers(validToken, 0)).resolves.toStrictEqual({
-        users,
-        nextPage: 1,
-      });
-    });
+describe('getSendGridUsers', () => {
+  beforeEach(() => {
+    server.use(
+      http.get('https://api.sendgrid.com/v3/teammates', ({ request }) => {
+        if (request.headers.get('Authorization') !== `Bearer ${validToken}`) {
+          return new Response(undefined, { status: 401 });
+        }
+        const url = new URL(request.url);
+        const requestLimit = parseInt(url.searchParams.get('limit') || '0');
+        const requestOffset = parseInt(url.searchParams.get('offset') || '0');
+        if (requestLimit !== limit || requestOffset !== offset) {
+          return new Response(undefined, { status: 400 });
+        }
+        const nextPage = offset + limit >= sendGridUsers.length ? null : offset + limit;
+        const pageUsers = sendGridUsers.slice(offset, offset + limit);
+        offset = nextPage !== null ? nextPage : offset; // Update offset for next request only if nextPage is not null
+        return new Response(JSON.stringify({ users: pageUsers, nextPage }), { status: 200 });
+      })
+    );
+  });
 
-    test('should return users and no nextPage when the token is valid and their is no other page', async () => {
-      await expect(getUsers(validToken, maxPage)).resolves.toStrictEqual({
-        users,
-        nextPage: null,
-      });
-    });
+  test('should fetch SendGrid users when token is valid', async () => {
+    const result = await getSendGridUsers(validToken, limit, offset);
+    expect(result.users).toEqual(sendGridUsers.slice(offset, offset + limit));
+  });
 
-    test('should throws when the token is invalid', async () => {
-      await expect(getUsers('foo-bar', 0)).rejects.toBeInstanceOf(MySaasError);
-    });
+  test('should throw SendgridError when token is invalid', async () => {
+    try {
+      await getSendGridUsers('invalidToken', limit, offset);
+    } catch (error) {
+      const sendgridError = error as SendgridError;
+      expect(sendgridError.message).toEqual('Could not retrieve users');
+    }
+  });
+  test('should return nextPage as null when end of list is reached', async () => {
+    const result = await getSendGridUsers(validToken, limit, offset);
+    expect(result.nextPage).toBeNull();
   });
 });
