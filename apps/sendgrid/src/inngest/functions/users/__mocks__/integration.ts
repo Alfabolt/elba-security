@@ -4,8 +4,10 @@ export const organisations = Array.from({ length: 5 }, (_, i) => ({
   region: 'us',
 }));
 
-export const users = Array.from({ length: 5 }, (_, i) => ({
+export const users = Array.from({ length: 10 }, (_, i) => ({
   id: `id-${i}`,
-  name: `username-${i}`,
+  username: `username-${i}`,
   email: `username-${i}@foo.bar`,
+  is_sso: false,
+  user_type: 'admin',
 }));

@@ -9,9 +9,11 @@ import { env } from '@/env';
 import { inngest } from '@/inngest/client';
 
 const formatElbaUser = (user: SendGridUser): User => ({
-  id: 'sg-abc',
-  displayName: user.name,
+  id: user.username,
+  displayName: user.username,
   email: user.email,
+  role: user.user_type,
+  authMethod: user.is_sso ? 'sso' : 'mfa',
   additionalEmails: [],
 });
 

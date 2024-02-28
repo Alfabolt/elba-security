@@ -2,15 +2,15 @@ import { http } from 'msw';
 import { describe, expect, test, beforeEach } from 'vitest';
 import { env } from '@/env';
 import { server } from '../../vitest/setup-msw-handlers';
-import { type SendGridUser, getUsers } from './users';
+import { getUsers } from './users';
 import type { SendgridError } from './commons/error';
 
-const users: SendGridUser[] = [
-  {
-    name: 'user1',
-    email: 'user1@gmail.com',
-  },
-];
+const users = Array.from({ length: 10 }, (_, i) => ({
+  username: `username-${i}`,
+  email: `username-${i}@foo.bar`,
+  is_sso: false,
+  user_type: 'admin',
+}));
 
 const validToken = env.SENDGRID_API_TOKEN;
 
@@ -24,15 +24,12 @@ describe('getSendGridUsers', () => {
         const url = new URL(request.url);
         const offset = parseInt(url.searchParams.get('offset') || '0');
         const lastOffset = 20; //assumed last offset to be 20
-        const nextOffset = 10; //max batch size(limit) is set to 10 in env, so next offset will begin from 10
+        if (offset === lastOffset) {
+          users.pop();
+        }
         return new Response(
           JSON.stringify({
-            data: {
-              users,
-              pagination: {
-                next: offset === lastOffset ? null : nextOffset,
-              },
-            },
+            result: users,
           }),
           { status: 200 }
         );
@@ -41,13 +38,13 @@ describe('getSendGridUsers', () => {
   });
 
   test('should fetch SendGrid users when token is valid', async () => {
-    const result = await getUsers(validToken, null);
+    const result = await getUsers(validToken, 0);
     expect(result.users).toEqual(users);
   });
 
   test('should throw SendgridError when token is invalid', async () => {
     try {
-      await getUsers('invalidToken', null);
+      await getUsers('invalidToken', 0);
     } catch (error) {
       const sendgridError = error as SendgridError;
       expect(sendgridError.message).toEqual('Could not retrieve users');

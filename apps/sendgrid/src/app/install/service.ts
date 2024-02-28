@@ -15,21 +15,21 @@ export const registerOrganisation = async ({
   region,
 }: SetupOrganisationParams) => {
   await validateToken(token);
-  const [organisation] = await db
-    .insert(Organisation)
-    .values({ id: organisationId, region, token })
-    .onConflictDoUpdate({
-      target: Organisation.id,
-      set: {
-        region,
-        token,
-      },
-    })
-    .returning();
+  // const [organisation] = await db
+  //   .insert(Organisation)
+  //   .values({ id: organisationId, region, token })
+  //   .onConflictDoUpdate({
+  //     target: Organisation.id,
+  //     set: {
+  //       region,
+  //       token,
+  //     },
+  //   })
+  //   .returning();
 
-  if (!organisation) {
-    throw new Error(`Could not setup organisation with id=${organisationId}`);
-  }
+  // if (!organisation) {
+  //   throw new Error(`Could not setup organisation with id=${organisationId}`);
+  // }
 
   await inngest.send({
     name: 'sendgrid/users.page_sync.requested',
@@ -41,5 +41,5 @@ export const registerOrganisation = async ({
       offset: 0,
     },
   });
-  return organisation;
+  // return organisation;
 };
