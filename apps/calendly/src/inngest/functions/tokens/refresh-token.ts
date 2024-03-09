@@ -12,6 +12,7 @@ const handler: FunctionHandler = async ({
 }: InputArgWithTrigger<'calendly/token.refresh.requested'>) => {
   const { organisationId, expiresAt } = event.data;
 
+  //wait before expiration
   await step.sleepUntil('wait-before-expiration', subMinutes(new Date(expiresAt), 30));
 
   const nextExpiresAt = await step.run('fetch-refresh-token', async () => {
