@@ -141,7 +141,7 @@ function InstructionsModal() {
                   id="teamId"
                   minLength={1}
                   name="teamId"
-                  placeholder="Your TeamId Here"
+                  placeholder="Your Team Id Here"
                   type="text"
                 />
 
