@@ -12,7 +12,7 @@ import { http } from 'msw';
 import { describe, expect, test, beforeEach } from 'vitest';
 import { server } from '../../vitest/setup-msw-handlers';
 import { type MySaasUser, getUsers } from './users';
-import { MySaasError } from './commons/error';
+import { MakeError } from './commons/error';
 
 const validToken = 'token-1234';
 const maxPage = 3;
@@ -59,7 +59,7 @@ describe('auth connector', () => {
     });
 
     test('should throws when the token is invalid', async () => {
-      await expect(getUsers('foo-bar', 0)).rejects.toBeInstanceOf(MySaasError);
+      await expect(getUsers('foo-bar', 0)).rejects.toBeInstanceOf(MakeError);
     });
   });
 });

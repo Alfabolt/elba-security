@@ -5,7 +5,7 @@ import { NonRetriableError } from 'inngest';
 import { type MySaasUser, getUsers } from '@/connectors/users';
 import { db } from '@/database/client';
 import { Organisation } from '@/database/schema';
-import { env } from '@/env';
+import { env } from '../../../../env';
 import { inngest } from '@/inngest/client';
 import { decrypt } from '@/common/crypto';
 
