@@ -15,6 +15,11 @@ export const inngest = new Inngest({
         page: string | null;
       };
     };
+    'guru/elba_app.uninstalled': {
+      data: {
+        organisationId: string;
+      };
+    };
   }>(),
   middleware: [rateLimitMiddleware, sentryMiddleware],
   logger,
