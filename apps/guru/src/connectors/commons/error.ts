@@ -1,9 +1,9 @@
-type MySaasErrorOptions = { response?: Response };
+type GuruErrorOptions = { response?: Response };
 
-export class MySaasError extends Error {
+export class GuruError extends Error {
   response?: Response;
 
-  constructor(message: string, { response }: MySaasErrorOptions = {}) {
+  constructor(message: string, { response }: GuruErrorOptions = {}) {
     super(message);
     this.response = response;
   }

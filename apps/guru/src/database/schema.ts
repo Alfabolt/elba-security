@@ -6,6 +6,7 @@ export const Organisation = pgTable('organisation', {
   region: text('region').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   // the following properties are examples, it can removed / replaced to fit your use-case
+  email: text('email').notNull(),
   token: text('token').notNull(),
 });
 

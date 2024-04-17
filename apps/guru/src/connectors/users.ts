@@ -1,27 +1,108 @@
-/**
- * DISCLAIMER:
- * This is an example connector, the function has a poor implementation. When requesting against API endpoint we might prefer
- * to valid the response data received using zod than unsafely assign types to it.
- * This might not fit your usecase if you are using a SDK to connect to the Saas.
- * These file illustrate potential scenarios and methodologies relevant for SaaS integration.
- */
+// import { GuruError } from './commons/error';
 
-import { MySaasError } from './commons/error';
+// export type GuruUser = {
+//   id: string;
+//   email: string;
+// };
 
-export type MySaasUser = {
+// type ApiResponseUser = {
+//   user: GuruUser;
+// };
+// type Pagination = {
+//   nextPage: string | null;
+// };
+// export const getUsers = async (token: string, email: string, page: string | null) => {
+//   const url = `https://api.getguru.com/api/v1/members?token=${page ? `page=${token}` : ''}`;
+//   console.log('url->', url);
+//   const credentials = `${email}:${token}`;
+//   const base64Credentials = btoa(credentials);
+
+//   const response = await fetch(url, {
+//     headers: {
+//       Authorization: `Basic ${base64Credentials}`,
+//       Accept: 'application/json',
+//     },
+//   });
+
+//   if (!response.ok) {
+//     throw new GuruError('Could not retrieve users', { response });
+//   }
+
+//   const responseData = await response.json();
+
+//   // Map over the response data to extract users
+//   const users: GuruUser[] = responseData.map((item: ApiResponseUser) => ({
+//     id: item.user.id,
+//     email: item.user.email,
+//   }));
+//   const pagination: Pagination = {
+//     nextPage: null,
+//   };
+//   const linkHeader = response.headers.get('Link');
+//   if (linkHeader) {
+//     const match = /<(?<url>[^>]+)>/.exec(linkHeader);
+//     if (match?.groups?.url) {
+//       const parsedUrl = new URL(match.groups.url);
+//       pagination.nextPage = parsedUrl.searchParams.get('token');
+//     }
+//   }
+//   console.log('pagination->', pagination);
+//   return { users, pagination };
+// };
+
+import { GuruError } from './commons/error';
+
+export type GuruUser = {
   id: string;
-  username: string;
   email: string;
 };
 
-type GetUsersResponseData = { users: MySaasUser[]; nextPage: number | null };
+type ApiResponseUser = {
+  user: GuruUser;
+};
+type Pagination = {
+  nextPage: string | null;
+};
+export const getUsers = async (token: string, email: string, page: string | null) => {
+  const url = 'https://api.getguru.com/api/v1/members/';
 
-export const getUsers = async (token: string, page: number | null) => {
-  const response = await fetch(`https://mysaas.com/api/v1/users?page=${page}`, {
-    headers: { Authorization: `Bearer ${token}` },
+  const credentials = `${email}:${token}`;
+  const base64Credentials = btoa(credentials);
+
+  const fullUrl = page ? `${url}?token=${page}` : url;
+
+  const response = await fetch(fullUrl, {
+    headers: {
+      Authorization: `Basic ${base64Credentials}`,
+      Accept: 'application/json',
+    },
   });
+
   if (!response.ok) {
-    throw new MySaasError('Could not retrieve users', { response });
+    throw new GuruError('Could not retrieve users', { response });
   }
-  return response.json() as Promise<GetUsersResponseData>;
+
+  const responseData = await response.json();
+
+  // Map over the response data to extract users
+  const users: GuruUser[] = responseData.map((item: ApiResponseUser) => ({
+    id: item.user.id,
+    email: item.user.email,
+  }));
+
+  const pagination: Pagination = {
+    nextPage: null,
+  };
+
+  const linkHeader = response.headers.get('Link');
+  if (linkHeader) {
+    const match = /<(?<url>[^>]+)>/.exec(linkHeader);
+    if (match?.groups?.url) {
+      const parsedUrl = new URL(match.groups.url);
+      pagination.nextPage = parsedUrl.searchParams.get('token');
+    }
+  }
+
+  console.log('pagination->', pagination);
+  return { users, pagination };
 };
