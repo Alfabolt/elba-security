@@ -38,6 +38,7 @@
     "@elba-security/test-utils": "workspace:*",
     "@elba-security/tsconfig": "workspace:*",
     "@next/eslint-plugin-next": "^14.0.2",
+    "@testcontainers/postgresql": "^10.8.1",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -47,6 +48,7 @@
     "inngest-cli": "^0.25.2",
     "msw": "^2.0.1",
     "postgres": "^3.4.3",
+    "testcontainers": "^10.8.1",
     "typescript": "^5",
     "vitest": "1.4.0"
   }
