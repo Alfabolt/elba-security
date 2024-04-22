@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS "organisation" (
+CREATE TABLE IF NOT EXISTS "organisations" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"token" text NOT NULL,
 	"email" text NOT NULL,

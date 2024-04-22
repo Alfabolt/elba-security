@@ -17,27 +17,26 @@ export const registerOrganisation = async ({
   region,
 }: SetupOrganisationParams) => {
   const result = await getUsers(token, email, null);
-  console.log('result is ', result);
-  // await db
-  //   .insert(Organisation)
-  //   .values({ id: organisationId, email, region, token })
-  //   .onConflictDoUpdate({
-  //     target: Organisation.id,
-  //     set: {
-  //       region,
-  //       token,
-  //       email,
-  //     },
-  //   });
+  await db
+    .insert(Organisation)
+    .values({ id: organisationId, email, region, token })
+    .onConflictDoUpdate({
+      target: Organisation.id,
+      set: {
+        region,
+        token,
+        email,
+      },
+    });
 
-  // await inngest.send({
-  //   name: 'guru/users.page_sync.requested',
-  //   data: {
-  //     isFirstSync: true,
-  //     organisationId,
-  //     region,
-  //     syncStartedAt: Date.now(),
-  //     page: null,
-  //   },
-  // });
+  await inngest.send({
+    name: 'guru/users.page_sync.requested',
+    data: {
+      isFirstSync: true,
+      organisationId,
+      region,
+      syncStartedAt: Date.now(),
+      page: null,
+    },
+  });
 };
