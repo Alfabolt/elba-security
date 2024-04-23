@@ -28,7 +28,6 @@ export const getUsers = async (token: string, email: string, page: string | null
   }
 
   const responseData = (await response.json()) as GuruUser[];
-  console.log('response data->', responseData);
   const users: GuruUser[] = responseData.map((item: GuruUser) => ({
     id: item.id,
     email: item.email,
