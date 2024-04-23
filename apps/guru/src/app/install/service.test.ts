@@ -6,7 +6,7 @@ import { inngest } from '@/inngest/client';
 import * as userConnector from '@/connectors/users';
 import { users } from '@/inngest/functions/users/__mocks__/integration';
 import { registerOrganisation } from './service';
-
+import * as crypto from '@/common/crypto';
 const token = 'test-token';
 const email = 'test@example.com';
 const region = 'us';
@@ -36,6 +36,7 @@ describe('registerOrganisation', () => {
       users,
       pagination: { nextPage: 'next-page' },
     });
+    vi.spyOn(crypto, 'encrypt').mockResolvedValue(token);
     await expect(
       registerOrganisation({
         organisationId: organisation.id,
@@ -65,6 +66,7 @@ describe('registerOrganisation', () => {
         page: null,
       },
     });
+    expect(crypto.encrypt).toBeCalledTimes(1);
   });
 
   test('should setup organisation when the organisation id is valid and the organisation is already registered', async () => {

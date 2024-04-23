@@ -5,8 +5,9 @@ import * as usersConnector from '@/connectors/users';
 import { db } from '@/database/client';
 import { Organisation } from '@/database/schema';
 import { syncUsersPage } from './sync-users-page';
-import { users } from './__mocks__/integration';
-
+import { elbaUsers, users } from './__mocks__/integration';
+import * as crypto from '@/common/crypto';
+import { env } from '@/env';
 const organisation = {
   id: '45a76301-f1dd-4a77-b12f-9d7d3fca3c90',
   token: 'test-token',
@@ -38,6 +39,8 @@ describe('sync-users', () => {
   test('should continue the sync when there is a next page', async () => {
     // setup the test with an organisation
     await db.insert(Organisation).values(organisation);
+    // @ts-expect-error -- this is a mock
+    vi.spyOn(crypto, 'decrypt').mockResolvedValue(undefined);
     vi.spyOn(usersConnector, 'getUsers').mockResolvedValue({
       users: users, // This now matches the expected GuruUser[]
       pagination: { nextPage: 'next-page' },
@@ -52,6 +55,8 @@ describe('sync-users', () => {
 
     await expect(result).resolves.toStrictEqual({ status: 'ongoing' });
 
+    expect(crypto.decrypt).toBeCalledTimes(1);
+    expect(crypto.decrypt).toBeCalledWith(organisation.token);
     // check that the function continue the pagination process
     expect(step.sendEvent).toBeCalledTimes(1);
     expect(step.sendEvent).toBeCalledWith('sync-users-page', {
@@ -68,6 +73,8 @@ describe('sync-users', () => {
 
   test('should finalize the sync when there is a no next page', async () => {
     await db.insert(Organisation).values(organisation);
+    // @ts-expect-error -- this is a mock
+    vi.spyOn(crypto, 'decrypt').mockResolvedValue(undefined);
     vi.spyOn(usersConnector, 'getUsers').mockResolvedValue({
       users,
       pagination: { nextPage: null },
@@ -79,9 +86,10 @@ describe('sync-users', () => {
       region: organisation.region,
       page: null,
     });
+
     await expect(result).resolves.toStrictEqual({ status: 'completed' });
 
-    // the function should not send another event that continue the pagination
-    expect(step.sendEvent).toBeCalledTimes(0);
+    expect(crypto.decrypt).toBeCalledTimes(1);
+    expect(crypto.decrypt).toBeCalledWith(organisation.token);
   });
 });

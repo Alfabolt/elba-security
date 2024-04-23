@@ -6,7 +6,7 @@ import { db } from '@/database/client';
 import { Organisation } from '@/database/schema';
 import { env } from '@/env';
 import { inngest } from '@/inngest/client';
-
+import { decrypt } from '@/common/crypto';
 const formatElbaUser = (user: GuruUser): User => ({
   id: user.id,
   displayName: user.email,
@@ -61,7 +61,8 @@ export const syncUsersPage = inngest.createFunction(
 
     const nextPage = await step.run('list-users', async () => {
       // retrieve this users page
-      const result = await getUsers(organisation.token, organisation.email, page);
+      const decryptedToken = await decrypt(organisation.token);
+      const result = await getUsers(decryptedToken, organisation.email, page);
 
       const users = result.users.map(formatElbaUser);
       // send the batch of users to Elba

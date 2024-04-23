@@ -10,3 +10,11 @@ export const users: GuruUser[] = Array.from({ length: 10 }, (_, i) => ({
   id: `id-${i}`,
   email: `user${i}@example.com`,
 }));
+
+export const elbaUsers = Array.from({ length: 10 }, (_, i) => ({
+  id: `userId-${i}`,
+  displayName: `test-${i}@example.com`,
+  role: 'member',
+  email: `test-${i}@example.com`,
+  authMethod: 'password',
+}));
